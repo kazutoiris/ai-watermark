@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AI 水印</string>
+    <string name="processing">处理中…</string>
+    <string name="processed">第 %d 张图片已保存</string>
+    <string name="exception">发生错误：%s</string>
+    <string name="select_image">点击选择图片</string>
+</resources>

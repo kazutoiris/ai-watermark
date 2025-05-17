@@ -1,0 +1,54 @@
+name: Minimal Android CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+jobs:
+  build:
+    name: Generate APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+            distribution: 'temurin'
+            java-version: '17'
+      - name: Build APK
+        run: bash ./gradlew assembleDebug --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/debug/app-debug.apk
+  release:
+    name: Release APK
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download APK from build
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Publish release
+        id: publish
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            *.apk
+      - name: Attest Release Files
+        id: attest
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            *.apk
